@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.edsk.mvc.service.impl.BoardMapper">
+ <!--  
+	<resultMap id="sample" type="egovframework.example.sample.service.SampleVO">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="description" column="description"/>
+		<result property="useYn" column="use_yn"/>
+		<result property="regUser" column="reg_user"/>
+	</resultMap>
+-->
+	<!-- 전체 목록 불러오기 -->
+	<select id="boardList" resultType="kr.co.edsk.mvc.service.BoardVO">
+		SELECT * FROM ( 		
+			SELECT Tb.*, ROWNUM rNum FROM ( 
+				<choose>
+					<when test='p_flag==null or p_flag=="all"'>
+						SELECT * FROM board
+					</when>
+					<when test='p_flag!=null or p_flag!="all"'>
+						SELECT * FROM board
+						WHERE p_flag=#{p_flag}
+					</when>
+				</choose>
+				<choose>
+					<when test='order=="view"'>
+						ORDER BY VIEWCOUNT ASC
+					</when>
+					<when test='order=="like"'> 
+						ORDER BY LIKESCOUNT ASC
+					</when>
+					<otherwise>
+		                ORDER BY B_IDX ASC					
+					</otherwise>
+				</choose>
+                )Tb
+			) 
+		ORDER BY rNum DESC
+	</select>
+	<!-- 
+	 -->
+	<!-- 게시글 분류 기준 추려내기 -->
+	<select id="selectFlags" resultType="String">
+		SELECT DISTINCT p_flag FROM board
+	</select>
+	
+	<select id="viewDetail" resultType="kr.co.edsk.mvc.service.BoardVO">
+		SELECT * FROM board
+		WHERE b_idx=#{b_idx}
+	</select>
+	<select id="viewImg" resultType="kr.co.edsk.mvc.service.ImagesVO">
+		SELECT * FROM images
+		WHERE b_idx=#{b_idx}
+	</select>
+
+
+	<insert id="insertDetail" parameterType="kr.co.edsk.mvc.service.BoardVO">
+		INSERT INTO board
+		(
+			B_IDX,
+			USERID,
+			TITLE,
+			SUMMARY,
+			IMG,
+			CONTENTS,
+			DATE_C,
+			POSTPW,
+			p_FLAG
+		)
+		VALUES (
+			board_seq.nextval,
+			#{userid},
+			#{title},
+			#{summary},
+			#{img},
+			#{contents},
+			sysdate,
+			#{postpw},
+			#{p_flag}
+		)
+	</insert>
+	
+	<select id="getBidx" resultType="int">
+		SELECT b_idx FROM board
+		WHERE userid=#{userid} AND img=#{img}
+	</select>
+	<!-- 이미지 추가 -->
+	<insert id="insertImg" parameterType="kr.co.edsk.mvc.service.ImagesVO">
+		INSERT INTO images (
+			I_IDX,
+			USERID,
+			B_IDX,
+			img
+		)
+		VALUES (
+			image_seq.nextval,
+			#{userid},
+			#{b_idx},
+			#{img}
+		)
+	</insert>
+	
+	<!-- 게시글 수정 -->
+	<update id="updateDetail" parameterType="kr.co.edsk.mvc.service.BoardVO">
+		UPDATE Board SET
+			UPDATEUSER=#{updateuser},
+			TITLE=#{title},
+			SUMMARY=#{summary},
+			IMG=#{img},
+			CONTENTS=#{contents},
+			DATE_U=sysdate,
+			POSTPW=#{postpw},
+			p_FLAG=#{p_flag}
+			
+		WHERE b_idx=#{b_idx}
+	</update>
+	<select id="getIidx" resultType="int">
+		SELECT i_idx FROM images
+		WHERE b_idx=#{b_idx}
+	</select>
+	<!-- 이미지 수정 -->
+	<update id="updateImg" parameterType="kr.co.edsk.mvc.service.ImagesVO">
+		UPDATE images SET
+			IMG=#{img},
+			USERID=#{userid},
+			B_IDX=#{b_idx}
+		WHERE I_IDX=#{i_idx}
+	</update>
+	<!-- 
+		WHERE b_idx=#{b_idx} AND userid=#{userid}	
+	 -->
+	
+	<!-- 게시글 삭제-->
+	<delete id="delete">
+		DELETE FROM board
+		WHERE b_idx=#{b_idx}
+	</delete>
+	<!-- 이미지 삭제 -->
+	<delete id="deleteImg">
+		DELETE FROM images
+		WHERE b_idx=#{b_idx}
+	</delete>
+	
+	<!-- 조회수 증가 -->
+	<update id="updateViews">
+		UPDATE board SET viewcount = viewcount+1
+		WHERE b_idx=#{b_idx}
+	</update>
+	
+	<!-- 좋아요 테이블 조회 -->
+	<select id="likeList" resultType="kr.co.edsk.mvc.service.LikesVO">
+		SELECT * FROM likes
+		WHERE userid=#{userid}
+	</select>
+	<!-- 리스트에서 좋아요 여부 조회 -->
+	<select id="listLikes" resultType="int">
+		SELECT b_idx FROM likes
+		WHERE userid=#{id}
+	</select>
+	<select id="viewLikes" resultType="kr.co.edsk.mvc.service.LikesVO">
+		<if test='userid!=null'>
+			SELECT * FROM likes
+			WHERE userid=#{userid}
+		</if>
+	</select>
+	<!-- 해당 게시글의 총 좋아요 수 나타내기 -->
+	<select id="countLike" resultType="int">
+		SELECT COUNT(*) FROM likes WHERE b_idx=#{b_idx}
+	</select>
+	<!-- 사용자가 특정 게시글 좋아요 했는지 여부 -->
+	<select id="viewLike" resultType="kr.co.edsk.mvc.service.LikesVO">
+		SELECT * FROM likes
+		WHERE b_idx=#{b_idx} AND userid=#{userid}
+	</select>
+	<!-- 좋아요 취소위한 좋아요 인덱스 추출 -->
+	<select id="viewLidx" resultType="int">
+		SELECT l_idx FROM likes
+		WHERE b_idx=#{b_idx} AND userid=#{userid}	
+	</select>
+	<!-- 좋아요 추가 -->
+	<insert id="addLike" parameterType="kr.co.edsk.mvc.service.LikesVO">
+		INSERT INTO likes (
+			L_IDX,
+			B_IDX,
+			USERID
+		)
+		VALUES (
+			likes_seq.nextval,
+			#{b_idx},
+			#{userid}
+		)
+	</insert>
+	<!-- 좋아요 취소 -->
+	<delete id="removeLike">
+		DELETE FROM likes 
+		WHERE l_idx=#{l_idx}
+	</delete>
+	<!-- 게시판 테이블에서 게시물의 좋아요 수 조정 -->
+	<update id="plusLike">
+		UPDATE board SET likescount = likescount+1
+		WHERE b_idx=#{b_idx}
+	</update>
+	<update id="minusLike">
+		UPDATE board SET likescount = likescount-1
+		WHERE b_idx=#{b_idx}
+	</update>
+	
+	
+	<!-- 게시글 비밀번호 확인 -->
+	<select id="pwCheck" resultType="int">
+		SELECT COUNT(*) FROM board
+		WHERE b_idx=#{b_idx} AND postpw=#{postpw}
+	</select>
+	<select id="pwGet" resultType="int">
+		SELECT postpw FROM board
+		WHERE b_idx=#{b_idx}
+	</select>
+	
+	
+	<!-- 김세연 추가 : 검색 결과 가져오기 -->
+	<select id="srchList" parameterType="String" resultType="boardVO">
+		select * from board 
+		where title || contents || userid || summary like '%'||#{key}||'%' 
+		order by b_idx desc
+	</select>
+
+	
+	
+	<!--  
+	<insert id="insertSample" parameterType="SampleVO">
+
+			INSERT INTO SAMPLE
+				( ID
+				  , NAME
+				  , DESCRIPTION
+				  , USE_YN
+				  , REG_USER )
+			VALUES ( #{id}
+				  , #{name}
+				  , #{description}
+				  , #{useYn}
+				  , #{regUser} )
+
+	</insert>
+
+	<update id="updateSample">
+
+			UPDATE SAMPLE
+			SET ID=#{id}
+				, NAME=#{name}
+				, DESCRIPTION=#{description}
+				, USE_YN=#{useYn}
+				  WHERE ID=#{id}
+
+	</update>
+
+	<delete id="deleteSample">
+
+			DELETE FROM SAMPLE
+			WHERE ID=#{id}
+
+	</delete>
+
+	<select id="selectSample" resultMap="sample">
+
+			SELECT
+				ID, NAME, DESCRIPTION, USE_YN, REG_USER
+			FROM SAMPLE
+			WHERE ID=#{id}
+
+	</select>
+
+	<select id="selectSampleList" parameterType="searchVO" resultType="egovMap">
+
+			SELECT
+				ID, NAME, DESCRIPTION, USE_YN, REG_USER
+			FROM SAMPLE
+			WHERE 1=1
+			<if test="searchKeyword != null and searchKeyword != ''">
+		        <choose>
+		            <when test="searchCondition == 0">
+						AND	ID LIKE '%' || #{searchKeyword} || '%'
+					</when>
+		            <when test="searchCondition == 1">
+						AND	NAME LIKE '%' || #{searchKeyword} || '%'
+					</when>
+				</choose>
+			</if>
+			ORDER BY ID ASC
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+	</select>
+
+	<select id="selectSampleListTotCnt" parameterType="searchVO" resultType="int">
+
+			SELECT COUNT(*) totcnt
+			FROM SAMPLE
+			WHERE 1=1
+			<if test="searchKeyword != null and searchKeyword != ''">
+		        <choose>
+		            <when test="searchCondition == 0">
+						AND ID LIKE '%' || #{searchKeyword} || '%'
+					</when>
+		            <when test="searchCondition == 1">
+						AND	NAME LIKE '%' || #{searchKeyword} || '%'
+					</when>
+				</choose>
+			</if>
+	</select>
+	-->
+</mapper>
