@@ -1,0 +1,17 @@
+ojt\service\BoardService.class
+ojt\service\BoardDefaultVO.class
+egovframework\example\sample\service\EgovSampleService.class
+egovframework\example\cmmn\web\EgovBindingInitializer.class
+egovframework\example\sample\web\EgovSampleController.class
+egovframework\example\sample\service\impl\SampleDAO.class
+egovframework\example\sample\service\SampleVO.class
+egovframework\example\sample\service\BoardVO.class
+egovframework\example\sample\service\impl\EgovSampleServiceImpl.class
+ojt\controller\HomeController.class
+egovframework\example\sample\service\SampleDefaultVO.class
+egovframework\example\cmmn\EgovSampleOthersExcepHndlr.class
+ojt\service\impl\BoardDAO.class
+egovframework\example\cmmn\web\EgovImgPaginationRenderer.class
+egovframework\example\sample\service\ImagesVO.class
+ojt\service\impl\BoardMapper.class
+egovframework\example\sample\service\impl\SampleMapper.class
