@@ -64,27 +64,24 @@ import org.springmodules.validation.commons.DefaultBeanValidator;
 
 import com.ibatis.sqlmap.engine.scope.SessionScope;
 
+
+
 /**
- * @Class Name : EgovSampleController.java
- * @Description : EgovSample Controller Class
- * @Modification Information
- * @
- * @  수정일      수정자              수정내용
- * @ ---------   ---------   -------------------------------
- * @ 2009.03.16           최초생성
- *
- * @author 개발프레임웍크 실행환경 개발팀
- * @since 2009. 03.16
- * @version 1.0
- * @see
- *
- *  Copyright (C) by MOPAS All right reserved.
- */
+* <pre>
+*  게시판 컨트롤러
+* 
+* </pre>
+* 
+* 
+* @Company : (주)한국이디에스
+* @Author  : Eunseo Gee
+* @Date    : 2021. 10. 14. 오전 11:11:27
+* @Version : 4.0
+*/
 
 @Controller
 public class BoardController {
 
-	
 	// 트랜잭션
 	@Resource(name = "txManager") 
 	protected DataSourceTransactionManager txManager;
@@ -101,52 +98,110 @@ public class BoardController {
 	@Resource(name = "beanValidator")
 	protected DefaultBeanValidator beanValidator;
 
-	// 메인 게시판
+	/**
+	  * <pre>
+	  *   홈(메인 페이지)로 이동
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @return
+	  * @throws Exception
+	*/
 	@RequestMapping(value = "/home.do", method = RequestMethod.GET)
-	public String home(Model model, Locale locale, HttpServletRequest req)throws Exception{
+	public String home(Model model, HttpServletRequest req)throws Exception{
 		
-		System.out.println("홈컨 들어옴");
-		
+		// 게시글 서비스 종류 별로 분류(플래그)
+		String flag = req.getParameter("flag");
 		String p_flag = req.getParameter("flag");
 		if(p_flag == null || p_flag=="undefined")
 			p_flag="all";
 
+		//정렬기준
 		String order = req.getParameter("order");
 		if(order == null || order=="undefined")
 			order="";
-		System.out.println("order : "+order);
 		
-		List<BoardVO> boardVO = boardService.boardList(p_flag, order);
+		// 선택 페이지, 처음 디폴트는 1 페이지
+		int pageC = 1;
+
+		// 게시글 전체 갯수
+		int totalCnt = boardService.boardCnt(p_flag);
+
+		// 한 페이지당 보여줄 게시글 갯수 
+		int show = 16;
+
+		// 페이지 갯수
+		int pageNum = (int)(Math.ceil((double)totalCnt/show));		
+		int[] pages =  new int[pageNum];
+		for(int i = 0; i<pageNum; i++) {
+			pages[i]=i+1;
+		}
 		
+		// 페이징 시작/끝 번호
+		int startP = pages[0];
+		int endP = pages[pageNum-1];
+		
+		String pageReq = req.getParameter("page");
+		if(pageReq != null)
+			pageC = Integer.parseInt(pageReq);
+		
+		// 한 페이지 당 시작/끝 게시물 번호
+		int start = totalCnt - (show * pageC) + 1;
+		if(start<=0)
+			start = 1;
+		int end = totalCnt - (show * (pageC - 1));
+		
+		// 전체 리스트 불러오기
+		List<BoardVO> boardVO = boardService.boardList(p_flag, order, start, end);
+		
+		// 게시글 서비스 종류 목록
 		HashSet<String> flagList = boardService.selectFlags();
 		ArrayList<String> flags = new ArrayList<>(flagList);
-
+		
+		// 로그인할 경우 세션에서 로그인 정보 받아옴 
 		String id = "";
 		HttpSession session = req.getSession();
 		if(session.getAttribute("sessionID")!=null)
 			id = String.valueOf(session.getAttribute("sessionID"));
 		
+		// 게시판에서 해당 계정의 좋아요들 표시
 		List<LikesVO> likeVO = boardService.viewLikes(id);
 		
+		// 전체 게시판에 각 게시글 당 좋아요들 표시
 		ArrayList<Integer> likes = null;
 		if(id!="" && id!=null) {
 			likes = boardService.listLikes(id);
 			Collections.sort(likes);
 		}
 		
-		//model.addAttribute("flag", flag);
+		// 화면 표시 위해 모델에 데이터 전달
+		model.addAttribute("flag", flag);
 		model.addAttribute("flags", flags);
 		model.addAttribute("flag", p_flag);
 		model.addAttribute("order", order);
+		
+		model.addAttribute("pageC", pageC);
+		model.addAttribute("pages", pages);
+		model.addAttribute("start", start);
+		model.addAttribute("endP", endP);
 		
 		model.addAttribute("likes", likes);
 		model.addAttribute("likeVO", likeVO);
 		
 		model.addAttribute("boardVO", boardVO);
+		
 		return "home";
 	}
 	
-	// 게시물 입력 페이지로 이동
+	/**
+	  * <pre>
+	  *		게시물 입력 페이지로 이동
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @return
+	  * @throws Exception
+	*/
 	@RequestMapping(value="/insert.do", method=RequestMethod.GET)
 	public String insert(Model model, HttpServletRequest req)throws Exception{
 
@@ -161,15 +216,23 @@ public class BoardController {
 	
 	public static String getUuid() {
 		String uuid = UUID.randomUUID().toString();
-		System.out.println("생성된UUID-1: " + uuid);
+		
 		// 중간에 포함된 하이픈 제거
 		uuid = uuid.replaceAll("-", "");
-		System.out.println("생성된UUID-2: " + uuid);
 		
 		return uuid;
 	}
 	
-	// 게시물 입력 동작 수행
+	/**
+	  * <pre>
+	  *		게시물 입력 작업 수행
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @param resp
+	  * @return
+	  * @throws Exception
+	*/
 	@RequestMapping(value="/insertAction.do", method=RequestMethod.POST)
 	public String insertAction(Model model, MultipartHttpServletRequest req, HttpServletResponse resp)throws Exception{
 		
@@ -198,7 +261,6 @@ public class BoardController {
 			while(itr.hasNext()) {
 				fileName = (String)itr.next();
 				mfile = req.getFile(fileName);
-				//System.out.println("mfile = " + mfile);
 				String ofile = new String(mfile.getOriginalFilename().getBytes(),"UTF-8");
 				
 				if("".equals(ofile)) {
@@ -267,7 +329,15 @@ public class BoardController {
 		return "redirect:home.do";
 	}
 		
-	// 게시물 상세보기
+	/**
+	  * <pre>
+	  *		게시물 상세보기
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @return
+	  * @throws Exception
+	*/
 	@Transactional
 	@RequestMapping(value="/detail.do", method=RequestMethod.GET)
 	public String detail(Model model, HttpServletRequest req)throws Exception{
@@ -313,36 +383,34 @@ public class BoardController {
 		return "detail";
 	}
 	
+	/**
+	  * <pre>
+	  *		게시불 비밀번호 검사
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @param resp
+	  * @return
+	  * @throws Exception
+	*/
 	@ResponseBody
 	@RequestMapping(value="/checkpw.do", method=RequestMethod.POST)
 	public String checkPw (Model model, HttpServletRequest req, HttpServletResponse resp) throws Exception{
 		
-		System.out.println("ajax로 check 호출");
-		
-		String params = req.getParameter("params");
-		System.out.println(params);
+		//String params = req.getParameter("params");
 		
 		String result="";
 		
-		System.out.println("1");
 		resp.setContentType("text/html; charset=UTF-8");
 		
-		System.out.println("2");
 		int b_idx = Integer.parseInt(req.getParameter("b_idx"));
-		System.out.println("b_idx : " + b_idx);
 		
 		String pw  = Integer.toString(boardService.pwGet(b_idx));
-		System.out.println("pw : " + pw);
 		
 		String postpw = req.getParameter("postpw");	
-		System.out.println("postpw : " + postpw);
-		
-		int check = boardService.pwCheck(b_idx, postpw);
-		System.out.println("check : " + check);
 		
 		if(pw.equals(postpw))
 			result="correct";
-		System.out.println("result :  " + result);
 		
 		BoardVO boardVO = boardService.viewDetail(b_idx);
 		ImagesVO imageVO = boardService.viewImg(b_idx);
@@ -356,59 +424,20 @@ public class BoardController {
 		return result;
 		
 	}
-	// 게시글에 비밀번호가 설정된 경우, 수정 창에 들어가기 전에 비밀번호 확인
-	@RequestMapping(value="/check.do", method=RequestMethod.POST)
-	public String check (Model model, HttpServletRequest req, HttpServletResponse resp, RedirectAttributes rttr) throws Exception{
-		
-		String result="";
-		String msg="";
-		String referer = req.getHeader("Referer");
-		
-		resp.setContentType("text/html; charset=UTF-8");
-
-		int b_idx = Integer.parseInt(req.getParameter("b_idx"));
-		System.out.println("b_idx : " + b_idx);
-		
-		String pw  = Integer.toString(boardService.pwGet(b_idx));
-		System.out.println("pw : " + pw);
-		
-		String postpw = req.getParameter("postpw");	
-		System.out.println("postpw : " + postpw);
-		
-		int check = boardService.pwCheck(b_idx, postpw);
-		System.out.println("check : " + check);
-		
-		if(check==1)
-			result="update";
-		else {
-			rttr.addFlashAttribute("result", "wrong");
-			result="forward:" + referer;
-			//msg="비밀번호 오류. 비밀번호를 다시 입력해주세요.";
-		}
-		/*
-		if(pw == postpw)
-			result = "correct";
-		*/
-
-		System.out.println("result :  " + result);
-		
-		BoardVO boardVO = boardService.viewDetail(b_idx);
-		ImagesVO imageVO = boardService.viewImg(b_idx);
-		
-		//model.addAttribute("msg", msg);
-		model.addAttribute("b_idx", b_idx);
-		model.addAttribute("boardVO", boardVO);
-		model.addAttribute("imageVO", imageVO);
-		
-		return result;
-		//return "update";
-	}
 	
-	// 게시물 업데이트 페이지로 이동
+	/**
+	  * <pre>
+	  *		게시물 업데이트 페이지로 이동
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @param boardVO
+	  * @param imageVO
+	  * @return
+	  * @throws Exception
+	*/
 	@RequestMapping(value="/update.do", method=RequestMethod.POST)
 	public String update(Model model, HttpServletRequest req, BoardVO boardVO, ImagesVO imageVO)throws Exception{
-		
-		System.out.println("업뎃 들어옴");
 		
 		HashSet<String> flagList = boardService.selectFlags();
 		ArrayList<String> flags = new ArrayList<>(flagList);
@@ -431,17 +460,23 @@ public class BoardController {
 
 		return "update";
 	}
-	// 업데이트 수행
+
+	/**
+	  * <pre>
+	  *		게시물 업데이트 작업 수행
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @param resp
+	  * @return
+	  * @throws Exception
+	*/
 	@RequestMapping(value="/updateAction.do", method=RequestMethod.POST)
 	public String updateAction(Model model, MultipartHttpServletRequest req, HttpServletResponse resp)throws Exception {
 		
-		System.out.println("업뎃액션 컨트롤러 시작");
-		
 		BoardVO boardVO = new BoardVO();
 		ImagesVO imageVO = new ImagesVO();
-		//imageVO = new ImagesVO();
 		
-		//String path = req.getSession().getServletContext().getRealPath("/resources/upload");
 		String path = req.getSession().getServletContext().getRealPath("/images");
 		resp.setContentType("text/html; charset=utf-8");
 		
@@ -463,7 +498,6 @@ public class BoardController {
 			while(itr.hasNext()) {
 				fileName = (String)itr.next();
 				mfile = req.getFile(fileName);
-				System.out.println("mfile = " + mfile);
 				String ofile = new String(mfile.getOriginalFilename().getBytes(),"UTF-8");
 				
 				if("".equals(ofile)) {
@@ -506,15 +540,11 @@ public class BoardController {
 		Object tempA = ((Map) temp2).get("ofile");
 		String img = tempA.toString();
 		String img2 = img;
-		System.out.println("img2 : " + img2);
 		
 		String olduserid = req.getParameter("olduserid");
-		System.out.println("olduserid : " + olduserid);
 		
-		//String userid = req.getParameter("userid");
 		HttpSession session = req.getSession();
 		String userid = String.valueOf(session.getAttribute("sessionID"));
-		System.out.println("new : " + userid);
 		boardVO.setTitle(req.getParameter("title"));
 		boardVO.setSummary(req.getParameter("summary"));
 		boardVO.setImg(img);
@@ -523,15 +553,11 @@ public class BoardController {
 		boardVO.setPostpw(postpw);
 		boardVO.setP_flag(req.getParameter("p_flag"));
 
-		//int b_idx = boardService.getBidx(olduserid, img2);
 		int b_idx = Integer.parseInt(req.getParameter("b_idx"));
-		System.out.println("b_idx1: " + b_idx);
 		boardVO.setB_idx(b_idx);
 		boardVO.setUpdateuser(userid);
 		
-		System.out.println("b_idx2: " + b_idx);
 		int i_idx = boardService.getIidx(b_idx);
-		
 		imageVO.setI_idx(i_idx);
 		imageVO.setUserid(userid);
 		imageVO.setB_idx(b_idx);
@@ -548,7 +574,16 @@ public class BoardController {
 			
 		return "redirect:detail.do?b_idx=" + b_idx;
 	}
-	// 게시물 삭제
+	
+	/**
+	  * <pre>
+	  *		게시물 삭제
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @return
+	  * @throws Exception
+	*/
 	@RequestMapping(value="/delete.do")
 	public String delete(Model model, HttpServletRequest req) throws Exception {
 		
@@ -559,11 +594,19 @@ public class BoardController {
 		return "redirect:home.do";
 	}
 	
+	/**
+	  * <pre>
+	  *		좋아요 Ajax 작업 위한 좋아요 테이불 불러오기
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @param likeVO
+	  * @return
+	  * @throws Exception
+	*/
 	@ResponseBody
 	@RequestMapping(value = "/likeList.do", method = RequestMethod.POST)
 	public ArrayList<LikesVO> likeList(Model model, HttpServletRequest req, LikesVO likeVO) throws Exception {
-		
-		System.out.println("likeList호출");
 		
 		String userid = "";
 		
@@ -578,11 +621,17 @@ public class BoardController {
 		return likeList;
 	}
 	
+	/**
+	  * <pre>
+	  *		좋아요 추가
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @throws Exception
+	*/
 	@ResponseBody
 	@RequestMapping(value = "/addlike.do", method = RequestMethod.POST)
 	public void addLike(Model model, HttpServletRequest req) throws Exception {
-		
-		System.out.println("addLike호출");
 		
 		LikesVO likeVO = new LikesVO();
 		String userid = "";
@@ -601,11 +650,17 @@ public class BoardController {
 		
 	}
 	
+	/**
+	  * <pre>
+	  *		좋아요 취소
+	  * </pre>
+	  * @param model
+	  * @param req
+	  * @throws Exception
+	*/
 	@ResponseBody
 	@RequestMapping(value = "/removelike.do", method = RequestMethod.POST)
 	public void removeLike(Model model, HttpServletRequest req) throws Exception {
-		
-		System.out.println("likeRemove호출");
 		
 		String userid = "";
 		
@@ -620,11 +675,16 @@ public class BoardController {
 		boardService.removeLike(l_idx);
 		boardService.minusLike(b_idx);
 		
-		
 	}
 	
-	
-	// 김세연 추가 : 검색기능
+	/**
+	  * <pre>
+	  *		김세연 추가 : 검색기능
+	  * </pre>
+	  * @param m
+	  * @param key
+	  * @return
+	*/
 	@RequestMapping("/srchAll.do")
 	public String srchAll(Model m, String key) {
 		List<BoardVO> blist = boardService.srchList(key);
@@ -635,145 +695,5 @@ public class BoardController {
 	}
 	
 
-	
-	/**
-	 * 글 목록을 조회한다. (pageing)
-	 * @param searchVO - 조회할 정보가 담긴 SampleDefaultVO
-	 * @param model
-	 * @return "egovSampleList"
-	 * @exception Exception
-	@RequestMapping(value = "/egovSampleList.do")
-	public String selectSampleList(@ModelAttribute("searchVO") SampleDefaultVO searchVO, ModelMap model) throws Exception {
-
-		// EgovPropertyService.sample
-		searchVO.setPageUnit(propertiesService.getInt("pageUnit"));
-		searchVO.setPageSize(propertiesService.getInt("pageSize"));
-
-		// pageing setting 
-		PaginationInfo paginationInfo = new PaginationInfo();
-		paginationInfo.setCurrentPageNo(searchVO.getPageIndex());
-		paginationInfo.setRecordCountPerPage(searchVO.getPageUnit());
-		paginationInfo.setPageSize(searchVO.getPageSize());
-
-		searchVO.setFirstIndex(paginationInfo.getFirstRecordIndex());
-		searchVO.setLastIndex(paginationInfo.getLastRecordIndex());
-		searchVO.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
-
-		List<?> sampleList = sampleService.selectSampleList(searchVO);
-		model.addAttribute("resultList", sampleList);
-
-		int totCnt = sampleService.selectSampleListTotCnt(searchVO);
-		paginationInfo.setTotalRecordCount(totCnt);
-		model.addAttribute("paginationInfo", paginationInfo);
-
-		return "sample/egovSampleList";
-	}
-*/
-
-	/**
-	 * 글 등록 화면을 조회한다.
-	 * @param searchVO - 목록 조회조건 정보가 담긴 VO
-	 * @param model
-	 * @return "egovSampleRegister"
-	 * @exception Exception
-	@RequestMapping(value = "/addSample.do", method = RequestMethod.GET)
-	public String addSampleView(@ModelAttribute("searchVO") SampleDefaultVO searchVO, Model model) throws Exception {
-		model.addAttribute("sampleVO", new SampleVO());
-		return "sample/egovSampleRegister";
-	}
-	 */
-
-	/**
-	 * 글을 등록한다.
-	 * @param sampleVO - 등록할 정보가 담긴 VO
-	 * @param searchVO - 목록 조회조건 정보가 담긴 VO
-	 * @param status
-	 * @return "forward:/egovSampleList.do"
-	 * @exception Exception
-	@RequestMapping(value = "/addSample.do", method = RequestMethod.POST)
-	public String addSample(@ModelAttribute("searchVO") SampleDefaultVO searchVO, SampleVO sampleVO, BindingResult bindingResult, Model model, SessionStatus status)
-			throws Exception {
-
-		// Server-Side Validation
-		beanValidator.validate(sampleVO, bindingResult);
-
-		if (bindingResult.hasErrors()) {
-			model.addAttribute("sampleVO", sampleVO);
-			return "sample/egovSampleRegister";
-		}
-
-		sampleService.insertSample(sampleVO);
-		status.setComplete();
-		return "forward:/egovSampleList.do";
-	}
-	 */
-
-	/**
-	 * 글 수정화면을 조회한다.
-	 * @param id - 수정할 글 id
-	 * @param searchVO - 목록 조회조건 정보가 담긴 VO
-	 * @param model
-	 * @return "egovSampleRegister"
-	 * @exception Exception
-	@RequestMapping("/updateSampleView.do")
-	public String updateSampleView(@RequestParam("selectedId") String id, @ModelAttribute("searchVO") SampleDefaultVO searchVO, Model model) throws Exception {
-		SampleVO sampleVO = new SampleVO();
-		sampleVO.setId(id);
-		// 변수명은 CoC 에 따라 sampleVO
-		model.addAttribute(selectSample(sampleVO, searchVO));
-		return "sample/egovSampleRegister";
-	}
-	 */
-
-	/**
-	 * 글을 조회한다.
-	 * @param sampleVO - 조회할 정보가 담긴 VO
-	 * @param searchVO - 목록 조회조건 정보가 담긴 VO
-	 * @param status
-	 * @return @ModelAttribute("sampleVO") - 조회한 정보
-	 * @exception Exception
-	public SampleVO selectSample(SampleVO sampleVO, @ModelAttribute("searchVO") SampleDefaultVO searchVO) throws Exception {
-		return sampleService.selectSample(sampleVO);
-	}
-	 */
-
-	/**
-	 * 글을 수정한다.
-	 * @param sampleVO - 수정할 정보가 담긴 VO
-	 * @param searchVO - 목록 조회조건 정보가 담긴 VO
-	 * @param status
-	 * @return "forward:/egovSampleList.do"
-	 * @exception Exception
-	@RequestMapping("/updateSample.do")
-	public String updateSample(@ModelAttribute("searchVO") SampleDefaultVO searchVO, SampleVO sampleVO, BindingResult bindingResult, Model model, SessionStatus status)
-			throws Exception {
-
-		beanValidator.validate(sampleVO, bindingResult);
-
-		if (bindingResult.hasErrors()) {
-			model.addAttribute("sampleVO", sampleVO);
-			return "sample/egovSampleRegister";
-		}
-
-		sampleService.updateSample(sampleVO);
-		status.setComplete();
-		return "forward:/egovSampleList.do";
-	}
-	 */
-
-	/**
-	 * 글을 삭제한다.
-	 * @param sampleVO - 삭제할 정보가 담긴 VO
-	 * @param searchVO - 목록 조회조건 정보가 담긴 VO
-	 * @param status
-	 * @return "forward:/egovSampleList.do"
-	 * @exception Exception
-	@RequestMapping("/deleteSample.do")
-	public String deleteSample(SampleVO sampleVO, @ModelAttribute("searchVO") SampleDefaultVO searchVO, SessionStatus status) throws Exception {
-		sampleService.deleteSample(sampleVO);
-		status.setComplete();
-		return "forward:/egovSampleList.do";
-	}
-	 */
 
 }

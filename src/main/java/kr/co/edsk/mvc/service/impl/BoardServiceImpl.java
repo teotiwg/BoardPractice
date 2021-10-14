@@ -35,33 +35,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+
+
 /**
- * @Class Name : EgovSampleServiceImpl.java
- * @Description : Sample Business Implement Class
- * @Modification Information
- * @
- * @  수정일      수정자              수정내용
- * @ ---------   ---------   -------------------------------
- * @ 2009.03.16           최초생성
- *
- * @author 개발프레임웍크 실행환경 개발팀
- * @since 2009. 03.16
- * @version 1.0
- * @see
- *
- *  Copyright (C) by MOPAS All right reserved.
- */
+* <pre>
+* 	게시판과 게시물 관련 서비스들 구현
+* 
+* </pre>
+* 
+* 
+* @Company : (주)한국이디에스
+* @Author  : Eunseo Gee
+* @Date    : 2021. 10. 14. 오후 2:22:39
+* @Version : 4.0
+*/
 
 @Transactional
 @Service("boardService")
 public class BoardServiceImpl extends EgovAbstractServiceImpl implements BoardService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BoardServiceImpl.class);
-
-	/** SampleDAO */
-	// TODO ibatis 사용
-	//@Resource(name = "sampleDAO")
-	//private SampleDAO sampleDAO;
 	
 	// TODO mybatis 사용
 	@Resource(name="boardMapper")
@@ -71,76 +64,85 @@ public class BoardServiceImpl extends EgovAbstractServiceImpl implements BoardSe
 	@Resource(name = "egovIdGnrService")
 	private EgovIdGnrService egovIdGnrService;
 
+	// 게시판(게시물 리스트) 불러오기
 	@Override
 	public List<BoardVO> boardList(@Param("p_flag") String p_flag, 
-									@Param("order") String order) throws Exception{
-		return boardDAO.boardList(p_flag, order);	
+									@Param("order") String order,
+									@Param("start") int start,
+									@Param("end") int end) throws Exception{
+		return boardDAO.boardList(p_flag, order, start, end);	
 	}
 	
-	// 게시글 분류 기준들 불러오기
+	// 게시물 총 갯수 계산
+	@Override
+	public int boardCnt(@Param("p_flag") String p_flag) throws Exception{
+		int count = boardDAO.boardCnt(p_flag);
+		return count;
+	}
+		
+	// 게시물 분류 기준들 불러오기
 	@Override
 	public HashSet<String> selectFlags() throws Exception{
 		HashSet<String> flags = boardDAO.selectFlags();
 		return flags;
 	}
 	
+	// 게시물 상세보기
 	@Override
 	public BoardVO viewDetail(int b_idx) throws Exception{
 		BoardVO boardVO = boardDAO.viewDetail(b_idx);	
 		return boardVO;
 	}
+	// 게시물 상세보기에서 이미지 보기
 	@Override
 	public ImagesVO viewImg(int b_idx) throws Exception{
-//		public ImagesVO viewImg(String img, int b_idx) throws Exception{
-		//ImagesVO imageVO = sampleDAO.viewImg(img, b_idx);
 		ImagesVO imageVO = boardDAO.viewImg(b_idx);
 		return imageVO;
 	}
+	
+	// 게시판에 나열된 게시물들에 좋아요 표시
 	@Override
 	public ArrayList<Integer> listLikes(String id) throws Exception{
-		//int likes = boardDAO.listLikes(userid);
 		return boardDAO.listLikes(id);
 	}
 	
-	// 특정 게시물의 총 좋아요 수가 얼마인지
+	// 상세페이지에서 해당 게시물의 좋아요 갯수 표시
 	@Override
 	public int countLike(int b_idx) throws Exception{
 		int cntLike = boardDAO.countLike(b_idx);
 		return cntLike;
 	}
-	// 게시글의 좋아요 여부 조회
+	
+	// 해당 계정의 각 게시물들의 좋아요 여부를 게시판에서 조회
 	@Override
 	public List<LikesVO> viewLikes(String userid) throws Exception{
-//	public List<Integer> viewLikes(String userid) throws Exception{
-		//public int[] viewLikes(String userid) throws Exception{
-		//int likes = boardDAO.viewLikes(userid);
 		return boardDAO.viewLikes(userid);
 	}
+	
+	// 게시물 상세페이지에서 좋아요 여부 표시
 	@Override
-//	public int viewLike(int b_idx, String userid) throws Exception{
-//	public LikesVO viewLike(int b_idx) throws Exception{
 	public LikesVO viewLike(int b_idx, String userid) throws Exception{
 		LikesVO likeVO = boardDAO.viewLike(b_idx, userid);
-		//int likeVO = boardDAO.viewLike(b_idx, userid);
 		return likeVO;
 	}
+	
+	// 좋아요 Ajax기능 위한 좋아요 인덱스 불러오기
 	@Override
 	public int viewLidx(@Param("b_idx")int b_idx, @Param("userid") String userid) throws Exception{
 		int l_idx = boardDAO.viewLidx(b_idx, userid);
 		return l_idx;
 	}
-	
+	// 좋아요 Ajax기능 위한 좋아요 테이블 불러오기
 	@Override
 	public ArrayList<LikesVO> likeList(@Param("userid") String userid) throws Exception{
 		ArrayList<LikesVO> likeVO = boardDAO.likeList(userid);
 		return likeVO;
 	}
+	
 	// 좋아요 추가
 	@Override
 	public void addLike(LikesVO likeVO) throws Exception{
 		boardDAO.addLike(likeVO);
-		//LikesVO like = boardDAO.addLike(likeVO);
-		//return like;
 	}
 	// 좋아요 취소
 	@Override
@@ -165,57 +167,51 @@ public class BoardServiceImpl extends EgovAbstractServiceImpl implements BoardSe
 		return viewCount;
 	}
 	
+	// 게시물 작성
 	@Override
 	public void insertDetail(BoardVO boardVO) throws Exception{
 		boardDAO.insertDetail(boardVO);
-		//return boardVO;
 	}
+	// 이미지 불러오기 위한 Bidx 가져오기
 	@Override
 	public int getBidx(String userid, String img) throws Exception{
-//		public String getBidx(String userid, String img) throws Exception{
-		//String b_idx =  Integer.toString(boardDAO.getBidx(userid, img));
 		int b_idx =  boardDAO.getBidx(userid, img);
-		
 		return b_idx;
 	}
-	
+	// 이미지 추가
 	@Override
 	public void insertImg(ImagesVO imageVO) throws Exception {
 		boardDAO.insertImg(imageVO);
 	}
 	
+	// 게시물  수정
 	@Override
 	public void updateDetail(BoardVO boardVO) throws Exception{
 		boardDAO.updateDetail(boardVO);
-		//return boardVO;
 	}
-	
+	// 이미지 테이블에서 이미지 수정 위해 이미지 인덱스 가져오기
 	public int getIidx(@Param("b_idx")int b_idx) throws Exception{
 		int iidx = boardDAO.getIidx(b_idx);
 		return iidx;
 	}
-	
+	// 이미지 수정
 	@Override
 	public void updateImg(ImagesVO imageVO) throws Exception{
-//		public void updateImg(String img, String b_idx) throws Exception{
-		//sampleDAO.updateImg(img, Integer.parseInt(b_idx));
 		boardDAO.updateImg(imageVO);
 	}
 	
+	// 게시물 삭제
 	@Override
 	public void delete(int b_idx) throws Exception{
 		boardDAO.delete(b_idx);
 	}
+	// 이미지 삭제
 	@Override
 	public void deleteImg(int b_idx) throws Exception{
 		boardDAO.deleteImg(b_idx);
 	}
 	
-	@Override
-	public int pwCheck(int b_idx, String postpw) throws Exception{
-		int check = boardDAO.pwCheck(b_idx, postpw);	
-		return check;
-	}
+	// 비밀번호 확인-----------------------
 	@Override
 	public int pwGet(@Param("b_idx")int b_idx) throws Exception{
 		int pw = boardDAO.pwGet(b_idx);
@@ -229,82 +225,5 @@ public class BoardServiceImpl extends EgovAbstractServiceImpl implements BoardSe
 	}
 	
 	
-	/**
-	 * 글을 등록한다.
-	 * @param vo - 등록할 정보가 담긴 SampleVO
-	 * @return 등록 결과
-	 * @exception Exception
-	@Override
-	public String insertSample(SampleVO vo) throws Exception {
-		LOGGER.debug(vo.toString());
-
-		//** ID Generation Service
-		String id = egovIdGnrService.getNextStringId();
-		vo.setId(id);
-		LOGGER.debug(vo.toString());
-
-		sampleDAO.insertSample(vo);
-		return id;
-	}
-	 */
-
-	/**
-	 * 글을 수정한다.
-	 * @param vo - 수정할 정보가 담긴 SampleVO
-	 * @return void형
-	 * @exception Exception
-	@Override
-	public void updateSample(SampleVO vo) throws Exception {
-		sampleDAO.updateSample(vo);
-	}
-	 */
-
-	/**
-	 * 글을 삭제한다.
-	 * @param vo - 삭제할 정보가 담긴 SampleVO
-	 * @return void형
-	 * @exception Exception
-	@Override
-	public void deleteSample(SampleVO vo) throws Exception {
-		sampleDAO.deleteSample(vo);
-	}
-	 */
-
-	/**
-	 * 글을 조회한다.
-	 * @param vo - 조회할 정보가 담긴 SampleVO
-	 * @return 조회한 글
-	 * @exception Exception
-	@Override
-	public SampleVO selectSample(SampleVO vo) throws Exception {
-		SampleVO resultVO = sampleDAO.selectSample(vo);
-		if (resultVO == null)
-			throw processException("info.nodata.msg");
-		return resultVO;
-	}
-	 */
-
-	
-	/**
-	 * 글 목록을 조회한다.
-	 * @param searchVO - 조회할 정보가 담긴 VO
-	 * @return 글 목록
-	 * @exception Exception
-	@Override
-	public List<?> selectSampleList(SampleDefaultVO searchVO) throws Exception {
-		return sampleDAO.selectSampleList(searchVO);
-	}
-	 */
-
-	/**
-	 * 글 총 갯수를 조회한다.
-	 * @param searchVO - 조회할 정보가 담긴 VO
-	 * @return 글 총 갯수
-	 * @exception
-	@Override
-	public int selectSampleListTotCnt(SampleDefaultVO searchVO) {
-		return sampleDAO.selectSampleListTotCnt(searchVO);
-	}
-	 */
 
 }

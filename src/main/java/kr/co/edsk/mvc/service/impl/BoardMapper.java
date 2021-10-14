@@ -28,133 +28,272 @@ import kr.co.edsk.mvc.service.ImagesVO;
 import kr.co.edsk.mvc.service.LikesVO;
 
 
+
 /**
- * sample에 관한 데이터처리 매퍼 클래스
- *
- * @author  표준프레임워크센터
- * @since 2014.01.24
- * @version 1.0
- * @see <pre>
- *  == 개정이력(Modification Information) ==
- *
- *          수정일          수정자           수정내용
- *  ----------------    ------------    ---------------------------
- *   2014.01.24        표준프레임워크센터          최초 생성
- *
- * </pre>
- */
+* <pre>
+* 	게시판과 게시물 관련 데이터 처리 매퍼 클래스
+* 
+* </pre>
+* 
+* 
+* @Company : (주)한국이디에스
+* @Author  : Eunseo Gee
+* @Date    : 2021. 10. 14. 오후 2:25:39
+* @Version : 4.0
+*/
 @Mapper("boardMapper")
 public interface BoardMapper {
 
-	// 게시글 목록 불러오기
+	/**
+	  * <pre>
+	  *		게시물 전체 목록 불러오기
+	  * </pre>
+	  * @param p_flag
+	  * @param order
+	  * @param start
+	  * @param end
+	  * @return
+	  * @throws Exception
+	*/
 	List<BoardVO> boardList(@Param("p_flag") String p_flag, 
-							@Param("order") String order) throws Exception;
-	// 게시글 분류 기준들 불러오기
+							@Param("order") String order,
+							@Param("start") int start,
+							@Param("end") int end
+							) throws Exception;
+	/**
+	  * <pre>
+	  *		게시물 총 갯수 계산
+	  * </pre>
+	  * @param p_flag
+	  * @return 게시물 총 갯수
+	  * @throws Exception
+	*/
+	int boardCnt(@Param("p_flag") String p_flag) throws Exception; 
+	
+	/**
+	  * <pre>
+	  *		게시물 분류 기준들 불러오기
+	  * </pre>
+	  * @return 게시물 카테고리
+	  * @throws Exception
+	*/
 	HashSet<String> selectFlags() throws Exception;
 	
-	// 게시물 상세보기
+	/**
+	  * <pre>
+	  *		게시물 상세보기
+	  * </pre>
+	  * @param b_idx
+	  * @return	
+	  * @throws Exception
+	*/
 	BoardVO	viewDetail(int b_idx) throws Exception;
-	// 이미지 정보 가져오기
+	
+	/**
+	  * <pre>
+	  *		게시물의 이미지 정보 가져오기
+	  * </pre>
+	  * @param b_idx
+	  * @return
+	  * @throws Exception
+	*/
 	ImagesVO viewImg(int b_idx) throws Exception;
 	
-	// 게시판에서 어느 게시글에 좋아요 했는지 조회
+	/**
+	  * <pre>
+	  *		게시판에 나열된 게시물들에 좋아요 표시
+	  * </pre>
+	  * @param id
+	  * @return
+	  * @throws Exception
+	*/
 	ArrayList<Integer> listLikes(@Param("id") String id) throws Exception;
-	// 특정 게시물의 총 좋아요 수가 얼마인지
+	
+	/**
+	  * <pre>
+	  *		특정 게시물의 총 좋아요 갯수 표시
+	  * </pre>
+	  * @param b_idx
+	  * @return
+	  * @throws Exception
+	*/
 	int countLike(int b_idx) throws Exception;
-	// 게시물이 좋아요 됐는지 조회
+	
+	/**
+	  * <pre>
+	  *		게시판에서 게시물 좋아요 여부 표시
+	  * </pre>
+	  * @param userid
+	  * @return
+	  * @throws Exception
+	*/
 	List<LikesVO> viewLikes ( @Param("userid") String userid) throws Exception;
 	
+	/**
+	  * <pre>
+	  *		좋아요 Ajax기능 위한 좋아요 인덱스 불러오기
+	  * </pre>
+	  * @param b_idx
+	  * @param userid
+	  * @return
+	  * @throws Exception
+	*/
 	int viewLidx(@Param("b_idx")int b_idx, @Param("userid") String userid) throws Exception;
 	
+	/**
+	  * <pre>
+	  *		게시물 상세페이지에서 좋아요 여부 표시
+	  * </pre>
+	  * @param b_idx
+	  * @param userid
+	  * @return
+	  * @throws Exception
+	*/
 	LikesVO viewLike(@Param("b_idx")int b_idx, @Param("userid") String userid) throws Exception;
 	
+	/**
+	  * <pre>
+	  *		좋아요 Ajax기능 위한 좋아요 테이블 불러오기
+	  * </pre>
+	  * @param userid
+	  * @return
+	  * @throws Exception
+	*/
 	ArrayList<LikesVO> likeList(@Param("userid") String userid) throws Exception;
-	// 좋아요 추가
+	
+	/**
+	  * <pre>
+	  *	좋아요 추가
+	  * </pre>
+	  * @param likeVO
+	  * @throws Exception
+	*/
 	void addLike(LikesVO likeVO) throws Exception;
-	// 좋아요 취소
+	
+	/**
+	  * <pre>
+	  *		좋아요 취소
+	  * </pre>
+	  * @param l_idx
+	  * @throws Exception
+	*/
 	void removeLike(@Param("l_idx")int l_idx) throws Exception;
 	
-	// 게시판 테이블의 게시물 좋아요 컬럼 수 증감
+	/**
+	  * <pre>
+	  *		게시판 테이블의 게시물 좋아요 컬럼 수 증감
+	  * </pre>
+	  * @param b_idx
+	  * @throws Exception
+	*/
 	void plusLike(@Param("b_idx")int b_idx) throws Exception;
 	void minusLike(@Param("b_idx")int b_idx) throws Exception;
 	
-	// 조회수 증가
+	/**
+	  * <pre>
+	  *		조회수 증가
+	  * </pre>
+	  * @param b_idx
+	  * @return
+	  * @throws Exception
+	*/
 	int updateViews(int b_idx) throws Exception;
 	
-	// 게시물 입력
+	/**
+	  * <pre>
+	  *		게시물 등록
+	  * </pre>
+	  * @param boardVO
+	  * @throws Exception
+	*/
 	void insertDetail(BoardVO boardVO) throws Exception;
 	
-	// Images등록 위한 외래키 b_idx 가져오기
+	/**
+	  * <pre>
+	  *		이미지 입력 위한 외래키인 게시글 번호 가져오기
+	  * </pre>
+	  * @param userid
+	  * @param img
+	  * @return 게시글 번호
+	  * @throws Exception
+	*/
 	int getBidx(@Param("userid") String userid, @Param("img") String img);
-	// Images 등록
+	
+	/**
+	  * <pre>
+	  *		이미지 등록
+	  * </pre>
+	  * @param imageVO
+	  * @throws Exception
+	*/
 	void insertImg(ImagesVO imageVO) throws Exception;
 
-	// 게시물 수정
+	/**
+	  * <pre>
+	  *		게시물 수정
+	  * </pre>
+	  * @param boardVO
+	  * @throws Exception
+	*/
 	void updateDetail(BoardVO boardVO) throws Exception;
-	// 이미지 수정
+	
+	/**
+	  * <pre>
+	  *		이미지 수정 위해 사진 번호 가져오기
+	  * </pre>
+	  * @param b_idx
+	  * @return 사진 번호
+	  * @throws Exception
+	*/
 	int getIidx(@Param("b_idx")int b_idx) throws Exception;
-	//void updateImg( @Param("img") String img, @Param("b_idx") String b_idx) throws Exception;
+	
+	/**
+	  * <pre>
+	  *		이미지 수정
+	  * </pre>
+	  * @param imageVO
+	  * @throws Exception
+	*/
 	void updateImg(ImagesVO imageVO) throws Exception;
 	
-	// 게시물 삭제
+	/**
+	  * <pre>
+	  *		게시물 삭제
+	  * </pre>
+	  * @param b_idx
+	  * @throws Exception
+	*/
 	void delete(int b_idx) throws Exception;
-	// 이미지 삭제
+	
+	/**
+	  * <pre>
+	  *		이미지 삭제
+	  * </pre>
+	  * @param b_idx
+	  * @throws Exception
+	*/
 	void deleteImg(int b_idx) throws Exception;
 	
-	// 게시물 비밀번호 확인
-	int pwCheck(@Param("b_idx")int b_idx,@Param("postpw") String postpw) throws Exception;
+	/**
+	  * <pre>
+	  *		게시물 비밀번호 확인
+	  * </pre>
+	  * @param b_idx
+	  * @param postpw
+	  * @return 게시물 비밀번호
+	  * @throws Exception
+	*/
 	int pwGet(@Param("b_idx")int b_idx) throws Exception;
 	
-	//김세연 추가 : 검색결과 가져오기
+	/**
+	  * <pre>
+	  *		김세연 추가 : 검색결과 가져오기
+	  * </pre>
+	  * @param key
+	  * @return
+	*/
 	List<BoardVO> srchList(String key);
 	
 	
 	
-	/**
-	 * 글을 등록한다.
-	 * @param vo - 등록할 정보가 담긴 SampleVO
-	 * @return 등록 결과
-	 * @exception Exception
-	void insertSample(SampleVO vo) throws Exception;
-	 */
-
-	/**
-	 * 글을 수정한다.
-	 * @param vo - 수정할 정보가 담긴 SampleVO
-	 * @return void형
-	 * @exception Exception
-	void updateSample(SampleVO vo) throws Exception;
-	 */
-
-	/**
-	 * 글을 삭제한다.
-	 * @param vo - 삭제할 정보가 담긴 SampleVO
-	 * @return void형
-	 * @exception Exception
-	void deleteSample(SampleVO vo) throws Exception;
-	 */
-
-	/**
-	 * 글을 조회한다.
-	 * @param vo - 조회할 정보가 담긴 SampleVO
-	 * @return 조회한 글
-	 * @exception Exception
-	SampleVO selectSample(SampleVO vo) throws Exception;
-	 */
-	/**
-	 * 글 목록을 조회한다.
-	 * @param searchVO - 조회할 정보가 담긴 VO
-	 * @return 글 목록
-	 * @exception Exception
-	List<?> selectSampleList(SampleDefaultVO searchVO) throws Exception;
-	 */
-
-	/**
-	 * 글 총 갯수를 조회한다.
-	 * @param searchVO - 조회할 정보가 담긴 VO
-	 * @return 글 총 갯수
-	 * @exception
-	int selectSampleListTotCnt(SampleDefaultVO searchVO);
-	 */
-
 }
