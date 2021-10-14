@@ -15,7 +15,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Market-Pro ::: Login</title>
+    <title>Market_Pro ::: Login</title>
 
     <!-- Custom fonts for this template-->  
     <link
@@ -45,7 +45,7 @@
                                 <div class="p-5">
                                     <div class="text-center">
                                     	<a href='/ojt/'>
-                                        	<label class="login_title">Market-Pro</label>
+                                        	<label class="login_title">Market_Pro</label>
                                         </a>
                                     </div>
                                     
@@ -72,7 +72,9 @@
                                     
                                     <hr>                                   
                                     <div class="text-center">
+                                    <!-- 
                                         <a class="small" href="/ojt/">회원가입</a>
+                                     -->
                                     </div>
                                 </div>
                             </div>

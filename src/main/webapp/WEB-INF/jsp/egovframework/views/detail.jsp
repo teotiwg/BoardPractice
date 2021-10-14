@@ -16,6 +16,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge">
         <title>Market_Pro</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -30,13 +31,13 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <script type="text/javascript" src="resources/js/product/detail.js"></script>
         <script>
-	      //let res;
 	    	let res = "${boardVO.likescount}";
 	
 	    	$(function(){
 	    		likeList();
 	    	});
 	    	
+	    	// Ajax 좋아요 기능 위해 좋아요 리스트 불러오기
 			function likeList() {
 				
 				var likeVO = {};
@@ -50,16 +51,14 @@
 			        data :  likeVO,
 			        dataType:'html', //'json'
 			        success :  function(result){
-						console.log("likeList 성공");
 			        },
 			        error : function(request, status, error) {
-			        	console.log("likeList 실패");
 			        	alert("code : " + request.status + "\n" + "message : " + request.responseText + "\n" + "error : " + error);
 			        }
 			    });
 			}
 		
-			
+			// 좋아요
 			function likeCreate() {
 		
 	 		if(${sessionScope.sessionID == null}) {
@@ -78,10 +77,8 @@
 					data : likeVO,
 					dataType:'html', //'json'
 					success : function(result) {
-						console.log("likeCreate Ajax 성공");
 						likeList();
 						
-						//let res= "${boardVO.likescount + 1}";
 						res = Number(res) + 1;
 						if(res < 0)
 							res = 0;
@@ -96,13 +93,13 @@
 	
 					},
 					error : function(request, status, error) {
-						console.log("like추가 실패");
 						alert("code : " + request.status + "\n" + "message : " + request.responseText + "\n" + "error : " + error);
 					    }
 					});
 		 		}
 			}
 		
+			// 좋아요 취소
 			function likeRemove(){
 				
 				var likeVO = {};
@@ -114,10 +111,8 @@
 					type: 'POST',
 					data: likeVO,
 					success: function(result){
-						console.log("likeRemove Ajax 성공");
 						likeList();
 						
-						//let res = "${boardVO.likescount - 1}";
 						res = Number(res) - 1;
 						if(res < 0)
 							res = 0;
@@ -131,12 +126,12 @@
 						$('#likeBtnSpan').append(res3);
 					},
 					error:function(request, status, error){
-						console.log("like취소 실패");
 						alert("code: " + request.status + "\n" + "message: " + request.responseText + "\n" + "error : " + error);
 					}
 				});	
 			}
 	       
+			// 비밀번호 체크
 			function pwCheck() {
 				var b_idx = "<c:out value='${boardVO.b_idx}' />";
 				var params = "b_idx="+b_idx+"&postpw="+$("#pw").val();
@@ -148,33 +143,20 @@
 					datatype: 'text',
 					success:function(result){
 						if(result == "correct"){		
-							console.log("ajax 성공??");
-							console.log("b_idx: " + b_idx);							
-							console.log("pw: " + pw);
-							console.log(params);
-							//location.href="./update.do?b_idx="+b_idx;	
-							//location.href="./update.do";	
 							 $("#detailFrm").attr("action", "/ojt/update.do").submit();
-							console.log("넘어감?");
 						}else{				
-							console.log("ajax 성공??2");
-							console.log("b_idx: " + b_idx);							
-							console.log("pw: " + pw);
-							console.log(params);
+				    		$('#pw').empty();
 							$('#mmsg').empty();
 							$('#mmsg').text("비밀번호를 다시 입력하세요.");
-				    		$('#pw').empty();
 						}
 					},
 			    	error:function(request,status){
-						console.log("ajax 실패??");
-			    		$('#mmsg').empty();
-						$('#mmsg').text("비밀번호를 다시 입력하세요.");
 			    		alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
 			    	}
 				});	
 			}
 			
+			// 로그아웃 확인
 			function logout(){
 				var result = confirm("로그아웃 하시겠습니까?");
 				if(result){
@@ -182,14 +164,15 @@
 				}else{
 					location.href = "#";
 				}
-				
 			}
 			
+			// 비밀번호 입력 시 엔터 키 잠금
 			document.addEventListener('keydown', function(event) {
 				  if (event.keyCode === 13) {
 				    event.preventDefault();
 				  };
 				}, true);
+			
         </script>
     </head>
     <body>
@@ -229,9 +212,6 @@
             <div class="container px-4 px-lg-5 my-5">
             	<form name="detailFrm" id="detailFrm" method="POST" enctype="multipart/form-data" action="/ojt/update.do" >
 	                <div class="row gx-4 gx-lg-5 align-items-center">
-	                <!--
-	                    <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="https://dummyimage.com/600x700/dee2e6/6c757d.jpg" alt="..." /></div>
-	                -->
 	                    <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="./images/${boardVO.img }" alt="..." /></div>
 	                    <div class="col-md-6">
 	                    	<div style="text-align:right;font-size:12pt;">
@@ -251,6 +231,7 @@
 		                            </span>	 
 	                    		</span>
 	                    	</div>
+	                    	
 	                    	<input type="hidden" name="i_idx" value="${imageVO.i_idx }" />
 	                    	<input type="hidden" name="b_idx" id="b_idx" value="${boardVO.b_idx }" />
 	                    	<input type="hidden" name="postpw" value="${boardVO.postpw }" />
@@ -262,10 +243,12 @@
 	                        <p class="lead">
 	                        	${fn:replace(boardVO.summary, newLineChar,"<br/>") }
 	                        </p>
+	                        
 	                        <div class="d-flex">
 	                            <button class="btn btn-outline-dark flex-shrink-0" type="button">
 	                             	신청하기
 	                            </button>&nbsp;&nbsp;
+	                            
 	                            <span id="likeBtnSpan">
 		                            <c:choose>
 		                            	<c:when test="${sessionScope.sessionID != null && sessionScope.sessionID==likeVO.userid }">
@@ -280,6 +263,7 @@
 		                        		</c:otherwise>
 	                        		</c:choose>
 	                            </span>
+	                            
                         		<c:choose>
 		                            <c:when test="${sessionScope.sessionID != null && boardVO.postpw == null}">
 		                            	<input type="submit" class="btn btn-outline-dark flex-shrink-0" value="수정">
@@ -292,6 +276,7 @@
 		                            <c:otherwise>
 		                            </c:otherwise>
 	                            </c:choose>
+	                            
 	                        </div>
 	                        
 	                    </div>
@@ -326,11 +311,14 @@
 					        <!-- Modal body -->
 					        <div class="modal-body" style="padding:0 30% 0 30%;">
 					        	<input type="hidden" name="b_idx" value="${boardVO.b_idx }" />
+					        	
 					        	<span id="mmsg" class="modal-title" style="font-size:10pt;">
 					        		게시글의 비밀번호를 입력하세요.
 					        	</span><br>
+					        	
 					        	<input type="password" id="pw" name="postpw" style="width:100%;margin:20px 0 15px 0;">
 					        </div>
+					        
 					        <div class="modal-footer" style="padding:0 43% 0 25%;border:none;margin-bottom:10px;">
 					          <input type="button" class="btn btn-outline-dark flex-shrink-0" onclick="pwCheck();" value="확인">
 					        </div>
