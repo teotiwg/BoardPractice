@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.edsk.mvc.service.impl.MyPageMapper">
+
+	<!-- 아이디로 회원정보 조회 -->
+	<select id="memberInfo" resultType="kr.co.edsk.mvc.service.MemberVO">
+		SELECT * FROM member 
+		WHERE userid=#{userid}
+	</select>
+	
+	<!-- 비밀번호 수정 -->
+	<update id="updatePass" parameterType="String">
+		UPDATE member SET
+			userpw=#{userpw}
+		WHERE userid=#{userid}
+	</update>
+	
+	<!-- 회원정보 수정 -->
+	<update id="updateMember" parameterType="kr.co.edsk.mvc.service.MemberVO">
+		UPDATE member SET
+			name=#{name},
+			phone=#{phone},
+			email=#{email}
+		WHERE userid=#{userid}
+	</update>
+	
+	<!-- 회원 탈퇴 -->
+	<delete id="memberDel">
+		DELETE FROM member 
+		WHERE userid=#{userid}
+	</delete>
+	
+	<!-- 아이디로 작성 게시물들 모두 불러오기 -->
+	<select id="getAllPosts" resultType="kr.co.edsk.mvc.service.BoardVO">
+		SELECT * FROM board
+		WHERE userid=#{userid}
+		ORDER BY b_idx
+	</select>
+	
+	<!-- 최신 작성 게시물들만 불러오기-->
+	<select id="recentPosts" resultType="kr.co.edsk.mvc.service.BoardVO">
+		SELECT * FROM (
+			SELECT * FROM board
+			WHERE userid=#{userid}
+			ORDER BY b_idx DESC
+		)
+		WHERE ROWNUM <![CDATA[<=]]> 6
+	</select>
+
+	<!-- 좋아요한 게시물들 모두 불러오기 -->
+	<select id="getAllLikes" resultType="kr.co.edsk.mvc.service.BoardVO">
+		SELECT * FROM likes
+		WHERE userid=#{userid}
+		ORDER BY l_idx
+	</select>
+
+	<!-- 최근에 좋아요한 게시물들 불러오기 -->
+	<select id="recentLikes" resultType="kr.co.edsk.mvc.service.BoardVO">
+		SELECT * FROM (
+			SELECT * FROM likes
+			WHERE userid=#{userid}
+			ORDER BY l_idx
+		)
+		WHERE ROWNUM <![CDATA[<=]]> 5
+	</select>
+	
+	
+	
+	
+</mapper>

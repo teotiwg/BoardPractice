@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.co.edsk.mvc.service.impl.BoardMapper">
- <!--  
-	<resultMap id="sample" type="egovframework.example.sample.service.SampleVO">
-		<result property="id" column="id"/>
-		<result property="name" column="name"/>
-		<result property="description" column="description"/>
-		<result property="useYn" column="use_yn"/>
-		<result property="regUser" column="reg_user"/>
-	</resultMap>
--->
+
 	<!-- 전체 목록 불러오기 -->
 	<select id="boardList" resultType="kr.co.edsk.mvc.service.BoardVO">
 		SELECT * FROM ( 		
@@ -36,25 +28,39 @@
 				</choose>
                 )Tb
 			) 
+		WHERE rNum BETWEEN #{start} AND #{end}
 		ORDER BY rNum DESC
 	</select>
-	<!-- 
-	 -->
+
+	<!-- 게시물 총 갯수 계산 -->
+	 <select id="boardCnt" resultType="int">
+	 	<choose>
+	 		<when test='p_flag!= null and p_flag!="all"'>
+	 			SELECT COUNT(*) FROM board WHERE p_flag=#{p_flag}
+	 		</when>
+	 		<otherwise>
+	 			SELECT COUNT(*) FROM board
+	 		</otherwise>
+	 	</choose>
+	 </select>
+	 
 	<!-- 게시글 분류 기준 추려내기 -->
 	<select id="selectFlags" resultType="String">
 		SELECT DISTINCT p_flag FROM board
 	</select>
 	
+	<!-- 게시물 상세보기 -->
 	<select id="viewDetail" resultType="kr.co.edsk.mvc.service.BoardVO">
 		SELECT * FROM board
 		WHERE b_idx=#{b_idx}
 	</select>
+	<!-- 게시물의 이미지 정보 가져오기 -->
 	<select id="viewImg" resultType="kr.co.edsk.mvc.service.ImagesVO">
 		SELECT * FROM images
 		WHERE b_idx=#{b_idx}
 	</select>
 
-
+	<!-- 게시물 등록 -->
 	<insert id="insertDetail" parameterType="kr.co.edsk.mvc.service.BoardVO">
 		INSERT INTO board
 		(
@@ -80,7 +86,7 @@
 			#{p_flag}
 		)
 	</insert>
-	
+	<!-- 이미지 입력 위한 외래키인 게시글 번호 가져오기 -->
 	<select id="getBidx" resultType="int">
 		SELECT b_idx FROM board
 		WHERE userid=#{userid} AND img=#{img}
@@ -115,6 +121,7 @@
 			
 		WHERE b_idx=#{b_idx}
 	</update>
+	<!-- 이미지 테이블에서 이미지 수정 위해 이미지 인덱스 가져오기 -->
 	<select id="getIidx" resultType="int">
 		SELECT i_idx FROM images
 		WHERE b_idx=#{b_idx}
@@ -127,9 +134,7 @@
 			B_IDX=#{b_idx}
 		WHERE I_IDX=#{i_idx}
 	</update>
-	<!-- 
-		WHERE b_idx=#{b_idx} AND userid=#{userid}	
-	 -->
+
 	
 	<!-- 게시글 삭제-->
 	<delete id="delete">
@@ -158,12 +163,14 @@
 		SELECT b_idx FROM likes
 		WHERE userid=#{id}
 	</select>
+	<!-- 해당 계정의 각 게시물들의 좋아요 여부를 게시판에서 조회 -->
 	<select id="viewLikes" resultType="kr.co.edsk.mvc.service.LikesVO">
 		<if test='userid!=null'>
 			SELECT * FROM likes
 			WHERE userid=#{userid}
 		</if>
 	</select>
+	
 	<!-- 해당 게시글의 총 좋아요 수 나타내기 -->
 	<select id="countLike" resultType="int">
 		SELECT COUNT(*) FROM likes WHERE b_idx=#{b_idx}
@@ -173,7 +180,7 @@
 		SELECT * FROM likes
 		WHERE b_idx=#{b_idx} AND userid=#{userid}
 	</select>
-	<!-- 좋아요 취소위한 좋아요 인덱스 추출 -->
+	<!-- 좋아요 취소 위한 좋아요 인덱스 추출 -->
 	<select id="viewLidx" resultType="int">
 		SELECT l_idx FROM likes
 		WHERE b_idx=#{b_idx} AND userid=#{userid}	
@@ -206,7 +213,6 @@
 		WHERE b_idx=#{b_idx}
 	</update>
 	
-	
 	<!-- 게시글 비밀번호 확인 -->
 	<select id="pwCheck" resultType="int">
 		SELECT COUNT(*) FROM board
@@ -217,7 +223,7 @@
 		WHERE b_idx=#{b_idx}
 	</select>
 	
-	
+
 	<!-- 김세연 추가 : 검색 결과 가져오기 -->
 	<select id="srchList" parameterType="String" resultType="boardVO">
 		select * from board 
@@ -226,86 +232,5 @@
 	</select>
 
 	
-	
-	<!--  
-	<insert id="insertSample" parameterType="SampleVO">
 
-			INSERT INTO SAMPLE
-				( ID
-				  , NAME
-				  , DESCRIPTION
-				  , USE_YN
-				  , REG_USER )
-			VALUES ( #{id}
-				  , #{name}
-				  , #{description}
-				  , #{useYn}
-				  , #{regUser} )
-
-	</insert>
-
-	<update id="updateSample">
-
-			UPDATE SAMPLE
-			SET ID=#{id}
-				, NAME=#{name}
-				, DESCRIPTION=#{description}
-				, USE_YN=#{useYn}
-				  WHERE ID=#{id}
-
-	</update>
-
-	<delete id="deleteSample">
-
-			DELETE FROM SAMPLE
-			WHERE ID=#{id}
-
-	</delete>
-
-	<select id="selectSample" resultMap="sample">
-
-			SELECT
-				ID, NAME, DESCRIPTION, USE_YN, REG_USER
-			FROM SAMPLE
-			WHERE ID=#{id}
-
-	</select>
-
-	<select id="selectSampleList" parameterType="searchVO" resultType="egovMap">
-
-			SELECT
-				ID, NAME, DESCRIPTION, USE_YN, REG_USER
-			FROM SAMPLE
-			WHERE 1=1
-			<if test="searchKeyword != null and searchKeyword != ''">
-		        <choose>
-		            <when test="searchCondition == 0">
-						AND	ID LIKE '%' || #{searchKeyword} || '%'
-					</when>
-		            <when test="searchCondition == 1">
-						AND	NAME LIKE '%' || #{searchKeyword} || '%'
-					</when>
-				</choose>
-			</if>
-			ORDER BY ID ASC
-			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
-	</select>
-
-	<select id="selectSampleListTotCnt" parameterType="searchVO" resultType="int">
-
-			SELECT COUNT(*) totcnt
-			FROM SAMPLE
-			WHERE 1=1
-			<if test="searchKeyword != null and searchKeyword != ''">
-		        <choose>
-		            <when test="searchCondition == 0">
-						AND ID LIKE '%' || #{searchKeyword} || '%'
-					</when>
-		            <when test="searchCondition == 1">
-						AND	NAME LIKE '%' || #{searchKeyword} || '%'
-					</when>
-				</choose>
-			</if>
-	</select>
-	-->
 </mapper>
