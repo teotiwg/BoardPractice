@@ -46,6 +46,7 @@
                     </ul>
                     <button class="btn btn-outline-dark" type="button" onclick="javascript:history.back();" style="margin-right:10px;">돌아가기</button>
                     <button class="btn btn-outline-dark" type="button" onclick="logout();">로그아웃</button>
+                    <a href="/ojt/mypage.do"><i class="material-icons" style="color:gray;font-size:35px;margin:10px 0 0 10px;">&#xe853;</i></a>
                 </div>
             </div>
         </nav>

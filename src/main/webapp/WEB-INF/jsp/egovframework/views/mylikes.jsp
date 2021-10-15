@@ -63,7 +63,7 @@
                             <div class="sb-sidenav-menu-heading">
 								<a class="nav-link" href="/ojt/mypage.do">
 	                            	마이페이지
-								</a>     
+								</a>    
 							</div>
                             <a class="nav-link" href="/ojt/myinfo.do">
                                 <div class="sb-nav-link-icon"><i class="material-icons" style="font-size:20px;">&#xe853;</i></div>
@@ -77,6 +77,7 @@
                                 <div class="sb-nav-link-icon"><i class="material-icons" style="font-size:20px;">&#xe87d;</i></div>
                                 	나의 좋아요
                             </a>
+
                         </div>
                     </div>
                 </nav>
@@ -85,53 +86,11 @@
                 <main>
                     <div class="container-fluid px-4">
                         <h2 class="mt-4">${sessionScope.sessionID }님의 마이페이지</h2>
-						<br>
-
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <i class="fas fa-book-open" style="font-size:15px;"></i>&nbsp;&nbsp;
-                                	최신 작성글 
-                            </div>
-                           	<div class="row">
-		                        	<c:forEach items="${boardVO}" var="post" varStatus="status">
-						            	<div class="col-xl-2 col-md-6" style="margin:20px auto;">
-							            	<div class="card bg text-black mb-3">
-							                	<div>
-								                	<a class="as" href="/ojt/detail.do?b_idx=${post.b_idx }"><img class="img" src="./images/${post.img }" style="width:100%;"></a>
-							                    </div>
-							                    <div class="card-footer d-flex align-items-center justify-content-between">
-							                        <a class="small text-black stretched-link" href="/ojt/detail.do?b_idx=${post.b_idx }" style="text-decoration:none;margin:auto;">
-							                        	${post.title }
-							                        </a>
-							                    </div>
-							                    <div style="margin:0 auto;font-size:10pt;">
-					                            	<span class="view">
-						                            	<i class="material-icons" style="font-size:12pt;">&#xe417;</i>
-					                            		<fmt:formatNumber type="number" maxFractionDigits="3" value="${post.viewcount }" />
-					                            	</span>
-					                            	<%-- c:choose>
-						                            	<c:when test="${sessionScope.sessionID!=null && likes.contain.b_idx)==true }">
-							                            	<i class="material-icons" style="color:red;font-size:12pt;">&#xe87d;</i>
-						                            	</c:when>
-						                            	<c:otherwise>
-						                            		<i class="material-icons" style="font-size:12pt;">&#xe87e;</i>
-						                            	</c:otherwise>
-						                            </c:choose--%>
-						                            <span class="likes">	
-						                            	<i class="material-icons" style="font-size:12pt;">&#xe87e;</i>
-						                            	<fmt:formatNumber type="number" maxFractionDigits="3" value="${post.likescount }" />	                            
-						                            </span>
-					                            </div>
-							                </div>
-							            </div>		
-						         	</c:forEach>
-				             </div>
-                        </div>
-                        
+						<br>                        
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="material-icons" style="font-size:20px;">&#xe87d;</i>&nbsp;
-                                	최신 좋아요
+                                	나의 좋아요
                             </div>
                             <div class="row">
                             	<c:forEach items="${likes}" var="like" varStatus="status">
@@ -143,7 +102,7 @@
 							                    <div class="card-footer d-flex align-items-center justify-content-between">
 							                        <a class="small text-black stretched-link" href="/ojt/detail.do?b_idx=${like.b_idx }" style="text-decoration:none;margin:auto;">
 							                        	${like.title }
-							                       	</a>
+							                        </a>
 							                    </div>
 							                    <div style="margin:0 auto;font-size:10pt;">
 					                            	<span class="view">

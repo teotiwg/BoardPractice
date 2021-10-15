@@ -201,6 +201,7 @@
                     	<c:otherwise>
                     		<button class="btn btn-outline-dark" type="button" onclick="javascript:location.href='/ojt/insert.do'">등록하기</button>&nbsp;&nbsp;
                     		<button class="btn btn-outline-dark" type="button" onclick="logout();">로그아웃</button>
+                    		<a href="/ojt/mypage.do"><i class="material-icons" style="color:gray;font-size:35px;margin:10px 0 0 10px;">&#xe853;</i></a>
                     	</c:otherwise>
                     </c:choose>
                 </div>
@@ -210,6 +211,7 @@
         <!-- Product section-->
         <section class="py-5">
             <div class="container px-4 px-lg-5 my-5">
+            
             	<form name="detailFrm" id="detailFrm" method="POST" enctype="multipart/form-data" action="/ojt/update.do" >
 	                <div class="row gx-4 gx-lg-5 align-items-center">
 	                    <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="./images/${boardVO.img }" alt="..." /></div>

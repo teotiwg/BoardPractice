@@ -60,18 +60,22 @@
                 <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                     <div class="sb-sidenav-menu">
                         <div class="nav">
-                            <div class="sb-sidenav-menu-heading">마이페이지</div>
-                            <a class="nav-link" href="/ojt/mypage.do">
+                            <div class="sb-sidenav-menu-heading">
+	                            <a class="nav-link" href="/ojt/mypage.do">
+	                            	마이페이지
+								</a>                            
+                            </div>
+                            <a class="nav-link" href="/ojt/myinfo.do">
                                 <div class="sb-nav-link-icon"><i class="material-icons" style="font-size:20px;">&#xe853;</i></div>
                                 	회원정보 조회 / 변경
                             </a>
-                            <a class="nav-link collapsed" href="#">
+                            <a class="nav-link" href="/ojt/myposts.do">
+                                <div class="sb-nav-link-icon"><i class="fas fa-book-open" style="font-size:15px;"></i></div>
+                                	작성 게시물
+                            </a>
+                            <a class="nav-link" href="/ojt/mylikes.do">
                                 <div class="sb-nav-link-icon"><i class="material-icons" style="font-size:20px;">&#xe87d;</i></div>
                                 	나의 좋아요
-                            </a>
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
-                                <div class="sb-nav-link-icon"><i class="fas fa-book-open" style="font-size:15px;"></i></div>
-                                	나의 게시글
                             </a>
 
                         </div>
@@ -87,79 +91,45 @@
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="fas fa-book-open" style="font-size:15px;"></i>&nbsp;&nbsp;
-                                	최신 작성글 
+                                	작성 게시물
                             </div>
-                            <div class="card-body">
-                                <c:forEach items="${boardVO}" var="result" varStatus="status">	
-				                	<div class="col mb-5">
-				                        <div class="card h-100">
-				                            <!-- Product image-->
-				                            <img class="card-img-top" src="./images/${result.img }" alt="..." />
-				                            <!-- Product details-->
-				                            <div class="card-body p-4">
-				                                <div class="text-center">
-				                                    <h5 class="fw-bolder">${result.title}</h5>
-				                                    <div class="small mb-1" style="font-size:9pt;">${result.p_flag}</div>
-				                                    	${fn:replace(result.summary, newLineChar,"<br/>") }
-				                                </div>
-				                            </div>
-				                            <!-- Product actions-->
-				                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-				                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="/ojt/detail.do?b_idx=${result.b_idx }">자세히 보기</a></div>
-				                            </div>
-				                            <div style="text-align:right;font-size:12pt;">
-				                            	<i class="material-icons" style="font-size:12pt;">&#xe417;</i>
-				                            	<span class="view">
-				                            		<fmt:formatNumber type="number" maxFractionDigits="3" value="${result.viewcount }" />
-				                            	</span>
-				                            	<c:choose>
-					                            	<c:when test="${sessionScope.sessionID!=null && likes.contains(result.b_idx)==true }">
-						                            	<i class="material-icons" style="color:red;font-size:12pt;">&#xe87d;</i>
-					                            	</c:when>
-					                            	<c:otherwise>
-					                            		<i class="material-icons" style="font-size:12pt;">&#xe87e;</i>
-					                            	</c:otherwise>
-					                            </c:choose>
-					                            <span class="likes">	
-					                            	<fmt:formatNumber type="number" maxFractionDigits="3" value="${result.likescount }" />	                            
-					                            </span>
-				                            </div>
-				                        </div>
-				                    </div>
-				                </c:forEach>	
-				                
-                            </div>
-                        </div>
-                        
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <i class="material-icons" style="font-size:20px;">&#xe87d;</i>&nbsp;
-                                	최신 좋아요
-                            </div>
-                            <div class="card-body">
-                                <table id="datatablesSimple">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Position</th>
-                                            <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Tiger Nixon</td>
-                                            <td>System Architect</td>
-                                            <td>Edinburgh</td>
-                                            <td>61</td>
-                                            <td>2011/04/25</td>
-                                            <td>$320,800</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                           	<div class="row">
+		                        	<c:forEach items="${myPosts}" var="post" varStatus="status">
+						            	<div class="col-xl-2 col-md-6" style="margin:20px auto;">
+							            	<div class="card bg text-black mb-3">
+							                	<div>
+								                	<a class="as" href="/ojt/detail.do?b_idx=${post.b_idx }"><img class="img" src="./images/${post.img }" style="width:100%;"></a>
+							                    </div>
+							                    <div class="card-footer d-flex align-items-center justify-content-between">
+							                        <a class="small text-black stretched-link" href="/ojt/detail.do?b_idx=${post.b_idx }" style="text-decoration:none;margin:auto;">
+							                        	${post.title }
+							                       	</a>
+							                    </div>
+							                    <div class="card-footer d-flex align-items-center justify-content-between">
+							                       	[작성] ${post.date_c }
+							                    </div>
+							                    <div style="margin:0 auto;font-size:10pt;">
+					                            	<span class="view">
+						                            	<i class="material-icons" style="font-size:12pt;">&#xe417;</i>
+					                            		<fmt:formatNumber type="number" maxFractionDigits="3" value="${post.viewcount }" />
+					                            	</span>
+					                            	<%-- c:choose>
+						                            	<c:when test="${sessionScope.sessionID!=null && likes.contain.b_idx)==true }">
+							                            	<i class="material-icons" style="color:red;font-size:12pt;">&#xe87d;</i>
+						                            	</c:when>
+						                            	<c:otherwise>
+						                            		<i class="material-icons" style="font-size:12pt;">&#xe87e;</i>
+						                            	</c:otherwise>
+						                            </c:choose--%>
+						                            <span class="likes">	
+						                            	<i class="material-icons" style="font-size:12pt;">&#xe87e;</i>
+						                            	<fmt:formatNumber type="number" maxFractionDigits="3" value="${post.likescount }" />	                            
+						                            </span>
+					                            </div>
+							                </div>
+							            </div>		
+						         	</c:forEach>
+				             </div>
                         </div>
                         
                     </div>
