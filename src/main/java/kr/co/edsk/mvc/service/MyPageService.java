@@ -30,12 +30,21 @@ public interface MyPageService {
 	
 	/**
 	  * <pre>
+	  *		비밀번호 변경 전에 비밀번호 확인용
+	  * </pre>
+	  * @param userid
+	  * @throws Exception
+	*/
+	String checkPass(@Param("userid") String userid) throws Exception;
+	
+	/**
+	  * <pre>
 	  *		비밀번호 변경
 	  * </pre>
 	  * @param userid
 	  * @throws Exception
 	*/
-	void updatePass(@Param("userid") String userid) throws Exception;
+	void updatePass(@Param("userid") String userid, @Param("userpw") String userpw) throws Exception;
 	
 	/**
 	  * <pre>
@@ -75,5 +84,36 @@ public interface MyPageService {
 	*/
 	List<BoardVO> recentPosts(@Param("userid") String userid) throws Exception;
 	
+	/**
+	  * <pre>
+	  *		좋아요한 게시물들 모두 불러오기
+	  * </pre>
+	  * @param userid
+	  * @return
+	  * @throws Exception
+	*/
+	List<Integer> getAllLikes (@Param("userid") String userid) throws Exception;
+	
+	/**
+	  * <pre>
+	  *		최근에 좋아요한 게시물들을 게시판 테이블에서 불러오기 위해 
+	  *		좋아요 테이블에서 b_idx(게시물 번호) 추출
+	  * </pre>
+	  * @param userid
+	  * @return
+	  * @throws Exception
+	*/
+	List<Integer> recentLikes (@Param("userid") String userid) throws Exception;
+	
+	/**
+	  * <pre>
+	  *		좋아요 테이블에서 가져온 게시물 번호로
+	  *		게시판 테이블에서 해당 게시물의 정보 가져옴
+	  * </pre>
+	  * @param b_idx
+	  * @return
+	  * @throws Exception
+	*/
+	BoardVO getBoard(@Param("b_idx") int b_idx) throws Exception;
 	
 }

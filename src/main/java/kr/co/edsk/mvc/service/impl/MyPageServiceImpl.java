@@ -3,6 +3,7 @@
  */
 package kr.co.edsk.mvc.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import egovframework.rte.fdl.cmmn.EgovAbstractServiceImpl;
 import egovframework.rte.fdl.idgnr.EgovIdGnrService;
 import kr.co.edsk.mvc.service.BoardVO;
+import kr.co.edsk.mvc.service.LikesVO;
 import kr.co.edsk.mvc.service.MemberVO;
 import kr.co.edsk.mvc.service.MyPageService;
 
@@ -51,10 +53,15 @@ public class MyPageServiceImpl extends EgovAbstractServiceImpl implements MyPage
 		return memberVO;
 	}
 	
+	public String checkPass(String userid) throws Exception{
+		String pass = mypageDAO.checkPass(userid);
+		return pass;
+	}
+	
 	// 비밀번호 변경
 	@Override
-	public void updatePass(String userid) throws Exception{
-		mypageDAO.updatePass(userid);
+	public void updatePass(String userid, String userpw) throws Exception{
+		mypageDAO.updatePass(userid, userpw);
 	}
 	
 	// 회원정보 수정
@@ -83,5 +90,25 @@ public class MyPageServiceImpl extends EgovAbstractServiceImpl implements MyPage
 		return boardVO;
 	}
 	
+	// 모든 좋아요 게시물들 조회
+	@Override
+	public List<Integer> getAllLikes (String userid) throws Exception{
+		List<Integer> myLikes = mypageDAO.getAllLikes(userid);
+		return myLikes;
+	}
+	
+	// 최근 좋아요한 게시물들 게시물 번호 조회
+	@Override
+	public List<Integer> recentLikes (String userid) throws Exception{
+		ArrayList<Integer> recentlikes = new ArrayList<Integer>();
+		recentlikes = (ArrayList<Integer>) mypageDAO.recentLikes(userid);
+		return recentlikes;
+	}
+	// recentLikes로 가져온 게시물 번호로 최근 좋아요한 게시물 정보 불러오기
+	@Override
+	public BoardVO getBoard(int b_idx) throws Exception{
+		BoardVO boardVO = mypageDAO.getBoard(b_idx);
+		return boardVO;
+	}
 	
 }

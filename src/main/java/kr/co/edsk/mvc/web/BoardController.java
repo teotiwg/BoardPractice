@@ -412,14 +412,14 @@ public class BoardController {
 		if(pw.equals(postpw))
 			result="correct";
 		
-		BoardVO boardVO = boardService.viewDetail(b_idx);
-		ImagesVO imageVO = boardService.viewImg(b_idx);
+		//BoardVO boardVO = boardService.viewDetail(b_idx);
+		//ImagesVO imageVO = boardService.viewImg(b_idx);
 
 		model.addAttribute("result", result);
-		model.addAttribute("b_idx", b_idx);
+		//model.addAttribute("b_idx", b_idx);
 		
-		model.addAttribute("boardVO", boardVO);
-		model.addAttribute("imageVO", imageVO);
+		//model.addAttribute("boardVO", boardVO);
+		//model.addAttribute("imageVO", imageVO);
 		
 		return result;
 		
@@ -450,8 +450,8 @@ public class BoardController {
 
 		imageVO = boardService.viewImg(b_idx);
 		
-		model.addAttribute("req", req);
-		model.addAttribute("model", model);
+		model.addAttribute("req", req); //??????????
+		model.addAttribute("model", model); //????????????
 		
 		model.addAttribute("flags", flags);
 		
@@ -545,6 +545,7 @@ public class BoardController {
 		
 		HttpSession session = req.getSession();
 		String userid = String.valueOf(session.getAttribute("sessionID"));
+		
 		boardVO.setTitle(req.getParameter("title"));
 		boardVO.setSummary(req.getParameter("summary"));
 		boardVO.setImg(img);
